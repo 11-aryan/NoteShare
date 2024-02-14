@@ -1,11 +1,10 @@
 package response
 
-
 import (
+	"context"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/log"
 	"time"
-	"context"
 )
 
 func Wrap(c *fiber.Ctx) (a *model) {
@@ -33,4 +32,3 @@ func ErrorHandler(c *fiber.Ctx, input error) (err error) {
 	}
 	return
 }
-

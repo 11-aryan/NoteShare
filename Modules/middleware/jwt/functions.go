@@ -10,7 +10,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-
 const SecretKey = "secret"
 
 // ValidateJWT is a middleware function to check if the request has a valid JWT token stored in the cookies

@@ -1,10 +1,10 @@
 package auth
 
 import (
+	"NotesApp/Utils/mongodb"
 	"github.com/go-playground/validator"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"NotesApp/Utils/mongodb"
 )
 
 var userCollection *mongo.Collection = mongodb.GetCollection(mongodb.DB, "users")

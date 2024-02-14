@@ -10,4 +10,3 @@ func UserRoutes(app *fiber.App) {
 	group.Get("/:id", GetUser)
 	app.Post("/signup", SignUp)
 }
-

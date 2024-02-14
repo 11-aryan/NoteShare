@@ -1,20 +1,20 @@
 package main
 
 import (
+	"NotesApp/Modules/auth"
 	"NotesApp/Modules/middleware/rateLimiting"
 	"NotesApp/Modules/notes"
-	"NotesApp/Utils/response"
 	"NotesApp/Modules/user"
-	"NotesApp/Modules/auth"
+	"NotesApp/Utils/mongodb"
+	"NotesApp/Utils/response"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"NotesApp/Utils/mongodb"
 )
 
 func main() {
 	app := fiber.New(
 		fiber.Config{
-			ErrorHandler: response.ErrorHandler,
+			ErrorHandler:  response.ErrorHandler,
 			StrictRouting: true,
 			CaseSensitive: true,
 		},

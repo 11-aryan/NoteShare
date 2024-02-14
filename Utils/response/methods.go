@@ -35,4 +35,3 @@ func (resp *model) Message(message interface{}) error {
 	}
 	return resp.Status(fiber.StatusOK).JSON(response)
 }
-

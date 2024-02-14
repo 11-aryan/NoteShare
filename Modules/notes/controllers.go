@@ -12,7 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-
 // Gets all notes of a user
 func GetNotes(c *fiber.Ctx) error {
 	return nil
@@ -20,7 +19,7 @@ func GetNotes(c *fiber.Ctx) error {
 
 // Creates a new Note for a user
 func CreateNote(c *fiber.Ctx) error {
-	ctx, cancel := 	context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	resp := response.Wrap(c)
 	var note Note
@@ -30,10 +29,10 @@ func CreateNote(c *fiber.Ctx) error {
 		resp.Error(err)
 	}
 	//using the validator library to validate required fields
-    err = validate.Struct(&note); 
+	err = validate.Struct(&note)
 	if err != nil {
-        resp.Error(err)
-    }
+		resp.Error(err)
+	}
 	currentUserId := note.Users[0]
 	currentUserObjID, err := primitive.ObjectIDFromHex(currentUserId)
 	if err != nil {
@@ -43,32 +42,32 @@ func CreateNote(c *fiber.Ctx) error {
 	note.Created.Time = currentTime
 	note.Created.UserId = currentUserObjID
 	note.Updated.Time = currentTime
-	note.Updated.UserId = currentUserObjID 
+	note.Updated.UserId = currentUserObjID
 	// Initializing a new Note object with values retrieved from request body
-	newNote := Note {
-		Title: note.Title, 
-		Users: note.Users,
+	newNote := Note{
+		Title:   note.Title,
+		Users:   note.Users,
 		Content: note.Content,
 		Created: note.Created,
 		Updated: note.Updated,
 	}
-	// Inserting the new note into the notes collection	
+	// Inserting the new note into the notes collection
 	result, err := notesCollection.InsertOne(ctx, newNote)
-    if err != nil {
-        resp.Error(err)
-    }
+	if err != nil {
+		resp.Error(err)
+	}
 	return resp.Data(result)
 }
 
 // Search a note based on title
 func Search(c *fiber.Ctx) error {
-	ctx, cancel := 	context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	resp := response.Wrap(c)
 	searchKey := c.Query("search_key")
 	filter := bson.M{
-		"title": bson.M {
-			"$regex": searchKey, 
+		"title": bson.M{
+			"$regex":   searchKey,
 			"$options": "i",
 		},
 	}
@@ -87,8 +86,8 @@ func Search(c *fiber.Ctx) error {
 		notes = append(notes, note)
 	}
 	if err := cursor.Err(); err != nil {
-        return resp.Error(err)
-    }
+		return resp.Error(err)
+	}
 	return resp.Data(notes)
 }
 
@@ -98,11 +97,11 @@ func GetNoteByID(c *fiber.Ctx) error {
 	resp := response.Wrap(c)
 	noteID := c.Params("id")
 	noteObjID, err := primitive.ObjectIDFromHex(noteID)
-    if err != nil {
+	if err != nil {
 		return resp.Error(err)
 	}
 	fmt.Println("noteobjID: ", noteObjID)
-	filter := bson.M {
+	filter := bson.M{
 		"_id": noteObjID,
 	}
 	var note Note
@@ -113,7 +112,6 @@ func GetNoteByID(c *fiber.Ctx) error {
 	return resp.Data(note)
 }
 
-
 //Update a note with given ID
 func UpdateNote(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -121,7 +119,7 @@ func UpdateNote(c *fiber.Ctx) error {
 	resp := response.Wrap(c)
 	noteID := c.Params("id")
 	noteObjID, err := primitive.ObjectIDFromHex(noteID)
-	if err !=  nil {
+	if err != nil {
 		return resp.Error(err)
 	}
 	var note Note
@@ -131,28 +129,28 @@ func UpdateNote(c *fiber.Ctx) error {
 		return resp.Error(err)
 	}
 	//using the validator library to validate required fields
-    err = validate.Struct(&note); 
+	err = validate.Struct(&note)
 	if err != nil {
-        return resp.Error(err)
-    }
+		return resp.Error(err)
+	}
 	currentTime := time.Now()
 	note.Updated.Time = currentTime
 	// Initializing a new Note object with values retrieved from request body
-	newNote := Note {
-		Id: noteObjID,
-		Title: note.Title, 
-		Users: note.Users,
+	newNote := Note{
+		Id:      noteObjID,
+		Title:   note.Title,
+		Users:   note.Users,
 		Content: note.Content,
 		Updated: note.Updated,
 	}
-	filter := bson.M {
+	filter := bson.M{
 		"_id": noteObjID,
 	}
-	update := bson.M {
-		"$set": bson.M {
-			"title": newNote.Title,
+	update := bson.M{
+		"$set": bson.M{
+			"title":   newNote.Title,
 			"content": newNote.Content,
-			"users": newNote.Users,
+			"users":   newNote.Users,
 			"updated": newNote.Updated,
 		},
 	}
@@ -169,7 +167,7 @@ func DeleteNote(c *fiber.Ctx) error {
 	resp := response.Wrap(c)
 	noteID := c.Params("id")
 	noteObjID, err := primitive.ObjectIDFromHex(noteID)
-	if err !=  nil {
+	if err != nil {
 		return resp.Error(err)
 	}
 	var data map[string]interface{}
@@ -185,20 +183,20 @@ func DeleteNote(c *fiber.Ctx) error {
 		return resp.Error(err)
 	}
 	currentTime := time.Now()
-	updated := Updated {
+	updated := Updated{
 		UserId: userObjID,
-		Time: currentTime,
+		Time:   currentTime,
 	}
-	deleted := Deleted {
-		Ok: true,
+	deleted := Deleted{
+		Ok:     true,
 		UserId: userObjID,
-		Time: currentTime,
+		Time:   currentTime,
 	}
-	filter := bson.M {
+	filter := bson.M{
 		"_id": noteObjID,
 	}
-	update := bson.M {
-		"$set": bson.M {
+	update := bson.M{
+		"$set": bson.M{
 			"deleted": deleted,
 			"updated": updated,
 		},
@@ -210,14 +208,13 @@ func DeleteNote(c *fiber.Ctx) error {
 	return resp.Message("Successfully Deleted Note")
 }
 
-
 func ShareNote(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	resp := response.Wrap(c)
 	noteID := c.Params("id")
 	noteObjID, err := primitive.ObjectIDFromHex(noteID)
-	if err !=  nil {
+	if err != nil {
 		return resp.Error(err)
 	}
 	var data map[string]interface{}
@@ -231,7 +228,7 @@ func ShareNote(c *fiber.Ctx) error {
 	for _, user := range usersInterface {
 		if userString, ok := user.(string); ok {
 			users = append(users, userString)
-		} 
+		}
 	}
 	userID := data["user_id"].(string)
 	userObjID, err := primitive.ObjectIDFromHex(userID)
@@ -239,17 +236,17 @@ func ShareNote(c *fiber.Ctx) error {
 		return resp.Error(err)
 	}
 	currentTime := time.Now()
-	updated := Updated {
+	updated := Updated{
 		UserId: userObjID,
-		Time: currentTime,
+		Time:   currentTime,
 	}
 	// Update the users field of the note with new users
-	filter := bson.M {
+	filter := bson.M{
 		"_id": noteObjID,
 	}
-	update := bson.M {
-		"$set": bson.M {
-			"users": users,
+	update := bson.M{
+		"$set": bson.M{
+			"users":   users,
 			"updated": updated,
 		},
 	}

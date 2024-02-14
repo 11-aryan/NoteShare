@@ -26,24 +26,24 @@ func SignUp(c *fiber.Ctx) error {
 		return resp.Error(err)
 	}
 	//using the validator library to validate required fields
-    err = validate.Struct(&user); 
+	err = validate.Struct(&user)
 	if err != nil {
-        return resp.Error(err)
-    }
+		return resp.Error(err)
+	}
 	hashedPassword, err := HashPassword(user.Password)
 	if err != nil {
 		return resp.Error(err)
 	}
-	newUser := User {
-		Name: user.Name,
-		Email: user.Email,
+	newUser := User{
+		Name:     user.Name,
+		Email:    user.Email,
 		Password: hashedPassword,
 	}
 	result, err := userCollection.InsertOne(ctx, newUser)
-    if err != nil {
-        return resp.Error(err)
-    }
-    return resp.Data(result)
+	if err != nil {
+		return resp.Error(err)
+	}
+	return resp.Data(result)
 }
 
 // Get a User with given user_id
@@ -52,8 +52,8 @@ func GetUser(c *fiber.Ctx) error {
 	defer cancel()
 	resp := response.Wrap(c)
 	userId := c.Params("id")
-	var user User 
-	// Converting the string user_id to mongoDB objectID 
+	var user User
+	// Converting the string user_id to mongoDB objectID
 	objectId, err := primitive.ObjectIDFromHex(userId)
 	if err != nil {
 		return resp.Error(err)
@@ -68,7 +68,7 @@ func GetUser(c *fiber.Ctx) error {
 func GetNotes(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	resp := response.Wrap(c) 
+	resp := response.Wrap(c)
 	userID := c.Params("id")
 	userObjID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
@@ -93,8 +93,8 @@ func GetNotes(c *fiber.Ctx) error {
 		notes = append(notes, note)
 	}
 	if err := cursor.Err(); err != nil {
-        return resp.Error(err)
-    }
+		return resp.Error(err)
+	}
 	return resp.Data(notes)
 }
 
