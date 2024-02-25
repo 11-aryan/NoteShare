@@ -2,6 +2,7 @@ package notes
 
 import (
 	"NotesApp/Utils/response"
+	"NotesApp/Utils/search"
 	"context"
 	"fmt"
 	"time"
@@ -11,11 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
-// Gets all notes of a user
-func GetNotes(c *fiber.Ctx) error {
-	return nil
-}
 
 // Creates a new Note for a user
 func CreateNote(c *fiber.Ctx) error {
@@ -89,6 +85,59 @@ func Search(c *fiber.Ctx) error {
 		return resp.Error(err)
 	}
 	return resp.Data(notes)
+}
+
+func CreateSearchIndex(c *fiber.Ctx) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	resp := response.Wrap(c)
+	userID := c.Params("userID")
+	filter := bson.M{
+        "users": bson.M{
+            "$in": []string{userID},
+        },
+    }
+	var notes []Note
+	cursor, err := notesCollection.Find(ctx, filter)
+	if err != nil {
+		log.Error(err)
+		return resp.Error(err)
+	}
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+		var note Note
+		if err = cursor.Decode(&note); err != nil {
+			return resp.Error(err)
+		}
+		notes = append(notes, note)
+	}
+	if err := cursor.Err(); err != nil {
+		return resp.Error(err)
+	}
+	documents := []search.Document{}
+	for _, note := range notes {
+		documents = append(documents, note)
+	}
+	fmt.Println("Documents: ", documents)
+	idx := search.IndexMap
+	idx.Add(documents)	
+	fmt.Println("Index map: ", idx)
+	return resp.Message("Successfully created index")
+}
+
+// Search notes from the cache using note title
+func SearchCache(c *fiber.Ctx) error {
+	_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	resp := response.Wrap(c)
+	searchKey := c.Query("search_key")
+	idx := search.IndexMap
+	fmt.Println("Loading index: ", idx)
+	matchedIDs := idx.Search(searchKey)
+	for _, id := range matchedIDs {
+		fmt.Println(id)
+	}
+	return resp.Data(matchedIDs)
 }
 
 func GetNoteByID(c *fiber.Ctx) error {
