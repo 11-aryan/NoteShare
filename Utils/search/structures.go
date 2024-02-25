@@ -1,13 +1,19 @@
 package search
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"NotesApp/Utils/cache"
+)
 
 // Index is an inverted index. It maps tokens to document IDs.
-type Index map[string][]primitive.ObjectID
+// type Index map[string][]primitive.ObjectID
 
-var IndexMap = make(Index)
+type Index struct {
+	hash cache.RedisClient
+}
+
+// var IndexMap = make(Index)
 
 type Document interface {
-    GetSearchString() string
-    GetID() primitive.ObjectID
+	GetSearchString() string
+	GetID() string
 }

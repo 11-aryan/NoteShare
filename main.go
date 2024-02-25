@@ -5,6 +5,7 @@ import (
 	"NotesApp/Modules/middleware/rateLimiting"
 	"NotesApp/Modules/notes"
 	"NotesApp/Modules/user"
+	"NotesApp/Utils/cache"
 	"NotesApp/Utils/mongodb"
 	"NotesApp/Utils/response"
 	"github.com/gofiber/fiber/v2"
@@ -29,6 +30,8 @@ func main() {
 	auth.AuthRoutes(app)
 	user.UserRoutes(app)
 	notes.NoteRoutes(app)
+
+	cache.InitRedis()
 
 	app.Listen(":8000")
 }

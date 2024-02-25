@@ -5,7 +5,6 @@ import (
 	"unicode"
 
 	snowballeng "github.com/kljensen/snowball/english"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // lowercaseFilter returns a slice of tokens normalized to lower case.
@@ -58,17 +57,16 @@ func analyze(text string) []string {
 	return tokens
 }
 
-
 // Intersection returns the set intersection between a and b.
 // a and b have to be sorted in ascending order and contain no duplicates.
-func Intersection(a []primitive.ObjectID, b []primitive.ObjectID) []primitive.ObjectID {
-	result := []primitive.ObjectID{}
-	isUsed := make(map[primitive.ObjectID]bool)
+func Intersection(a []string, b []string) []string {
+	result := []string{}
+	isUsed := make(map[string]bool)
 	for _, id := range a {
 		if isUsed[id] {
 			continue
 		}
-		isUsed[id] = true 
+		isUsed[id] = true
 		result = append(result, id)
 	}
 	return result

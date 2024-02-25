@@ -98,7 +98,7 @@ func GetNotes(c *fiber.Ctx) error {
 	return resp.Data(notes)
 }
 
-//Function to hash the password
+// Function to hash the password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err

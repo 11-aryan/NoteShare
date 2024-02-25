@@ -1,11 +1,9 @@
-package user 
-
-import "go.mongodb.org/mongo-driver/bson/primitive"
+package user
 
 func (u User) GetSearchString() string {
 	return u.Name
 }
 
-func (u User) GetID() primitive.ObjectID {
-	return u.Id
+func (u User) GetID() string {
+	return u.Id.Hex()
 }

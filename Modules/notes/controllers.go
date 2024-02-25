@@ -4,7 +4,6 @@ import (
 	"NotesApp/Utils/response"
 	"NotesApp/Utils/search"
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -93,10 +92,10 @@ func CreateSearchIndex(c *fiber.Ctx) error {
 	resp := response.Wrap(c)
 	userID := c.Params("userID")
 	filter := bson.M{
-        "users": bson.M{
-            "$in": []string{userID},
-        },
-    }
+		"users": bson.M{
+			"$in": []string{userID},
+		},
+	}
 	var notes []Note
 	cursor, err := notesCollection.Find(ctx, filter)
 	if err != nil {
@@ -118,10 +117,8 @@ func CreateSearchIndex(c *fiber.Ctx) error {
 	for _, note := range notes {
 		documents = append(documents, note)
 	}
-	fmt.Println("Documents: ", documents)
-	idx := search.IndexMap
-	idx.Add(documents)	
-	fmt.Println("Index map: ", idx)
+	idx := search.Index{}
+	idx.Add(documents, userID)
 	return resp.Message("Successfully created index")
 }
 
@@ -131,11 +128,12 @@ func SearchCache(c *fiber.Ctx) error {
 	defer cancel()
 	resp := response.Wrap(c)
 	searchKey := c.Query("search_key")
-	idx := search.IndexMap
-	fmt.Println("Loading index: ", idx)
-	matchedIDs := idx.Search(searchKey)
-	for _, id := range matchedIDs {
-		fmt.Println(id)
+	userID := c.Query("user_id")
+	idx := search.Index{}
+	matchedIDs, err := idx.Search(searchKey, userID)
+	if err != nil {
+		log.Error(err)
+		return err
 	}
 	return resp.Data(matchedIDs)
 }
@@ -149,7 +147,6 @@ func GetNoteByID(c *fiber.Ctx) error {
 	if err != nil {
 		return resp.Error(err)
 	}
-	fmt.Println("noteobjID: ", noteObjID)
 	filter := bson.M{
 		"_id": noteObjID,
 	}
@@ -161,7 +158,7 @@ func GetNoteByID(c *fiber.Ctx) error {
 	return resp.Data(note)
 }
 
-//Update a note with given ID
+// Update a note with given ID
 func UpdateNote(c *fiber.Ctx) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
