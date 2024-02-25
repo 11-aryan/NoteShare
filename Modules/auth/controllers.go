@@ -4,7 +4,6 @@ import (
 	"NotesApp/Utils/response"
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -17,7 +16,6 @@ import (
 const SecretKey = "secret"
 
 func login(c *fiber.Ctx) error {
-	fmt.Println("Login Called")
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	resp := response.Wrap(c)
