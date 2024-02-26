@@ -63,11 +63,12 @@ func Intersection(a []string, b []string) []string {
 	result := []string{}
 	isUsed := make(map[string]bool)
 	for _, id := range a {
-		if isUsed[id] {
-			continue
-		}
 		isUsed[id] = true
-		result = append(result, id)
+	}
+	for _, id := range b {
+		if isUsed[id] {
+			result = append(result, id)
+		}
 	}
 	return result
 }
